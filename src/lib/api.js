@@ -22,7 +22,7 @@ export function getApiBase() {
       return 'http://127.0.0.1:8000/api/v1';
     }
   }
-  return 'https://ecdat-api.onrender.com/api/v1';
+  return 'https://ecdat-p9py.onrender.com/api/v1';
 }
 
 export function setCustomApiBase(url) {

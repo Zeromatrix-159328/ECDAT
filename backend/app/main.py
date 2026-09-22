@@ -36,6 +36,18 @@ app.include_router(migration.router, prefix=api_v1_prefix)
 app.include_router(recommendations.router, prefix=api_v1_prefix)
 app.include_router(graph.router, prefix=api_v1_prefix)
 
+@app.get("/", tags=["Root"])
+@app.head("/", tags=["Root"])
+def root():
+    return {
+        "message": "Enterprise Cryptographic Discovery & Assessment Tool (ECDAT) API is running",
+        "status": "healthy",
+        "version": settings.VERSION,
+        "docs": f"{api_v1_prefix}/docs",
+        "health": f"{api_v1_prefix}/health",
+        "frontend": "https://zeromatrix-159328.github.io/ECDAT/"
+    }
+
 @app.get("/health", tags=["Health"])
 @app.get(f"{api_v1_prefix}/health", tags=["Health"])
 def health_check():
@@ -46,7 +58,7 @@ def health_check():
         "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat()
     }
 
-# Check for static dist directories (support single-service unified deployment)
+# Check for static dist directories (support single-service unified deployment if present)
 dist_paths = [
     os.path.join(os.path.dirname(__file__), "..", "..", "dist"),
     os.path.join(os.path.dirname(__file__), "..", "dist"),
@@ -60,12 +72,10 @@ for p in dist_paths:
         break
 
 if static_dir:
-    # Mount assets folder
     assets_path = os.path.join(static_dir, "assets")
     if os.path.exists(assets_path):
         app.mount("/assets", StaticFiles(directory=assets_path), name="static_assets")
 
-    # SPA catch-all route
     @app.get("/{full_path:path}", include_in_schema=False)
     async def serve_spa(full_path: str):
         file_path = os.path.join(static_dir, full_path)
