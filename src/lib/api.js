@@ -1,16 +1,48 @@
 /**
  * ECDAT Frontend API Client
  * Seamlessly interfaces with the FastAPI backend (/api/v1).
- * If the backend is unavailable (e.g. static preview or offline demo),
- * it gracefully returns null or falls back so that components can use local fixtures.
+ * Supports GitHub Pages -> Render backend cross-origin communication.
+ * Falls back gracefully to local fixtures if backend is offline or sleeping.
  */
 
-const API_BASE = import.meta.env.VITE_API_URL 
-  ? `${import.meta.env.VITE_API_URL.replace(/\/$/, '')}/api/v1`
-  : '/api/v1';
+export function getApiBase() {
+  if (typeof window !== 'undefined') {
+    const custom = localStorage.getItem('ecdat_custom_api_url');
+    if (custom && custom.trim()) {
+      return custom.trim().replace(/\/$/, '');
+    }
+  }
+  if (import.meta.env.VITE_API_URL) {
+    const envUrl = import.meta.env.VITE_API_URL.replace(/\/$/, '');
+    return envUrl.endsWith('/api/v1') ? envUrl : `${envUrl}/api/v1`;
+  }
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1') {
+      return 'http://127.0.0.1:8000/api/v1';
+    }
+  }
+  return 'https://ecdat-api.onrender.com/api/v1';
+}
+
+export function setCustomApiBase(url) {
+  if (typeof window !== 'undefined') {
+    if (url && url.trim()) {
+      const formatted = url.trim().replace(/\/$/, '');
+      const withV1 = formatted.endsWith('/api/v1') ? formatted : `${formatted}/api/v1`;
+      localStorage.setItem('ecdat_custom_api_url', withV1);
+      return withV1;
+    } else {
+      localStorage.removeItem('ecdat_custom_api_url');
+      return getApiBase();
+    }
+  }
+  return getApiBase();
+}
 
 async function request(endpoint, options = {}) {
-  const url = `${API_BASE}${endpoint}`;
+  const base = getApiBase();
+  const url = `${base}${endpoint}`;
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 6000);
@@ -32,16 +64,29 @@ async function request(endpoint, options = {}) {
     }
     return await res.json();
   } catch (err) {
-    // Return null on failure to allow caller to fall back gracefully
     console.debug(`[ECDAT API] Offline/Fallback mode for ${endpoint}:`, err.message);
     return null;
   }
 }
 
 export const api = {
-  // Health
+  getBaseUrl() {
+    return getApiBase();
+  },
+
+  setBaseUrl(url) {
+    return setCustomApiBase(url);
+  },
+
+  // Health check with latency measurement
   async checkHealth() {
-    return await request('/health');
+    const start = Date.now();
+    const res = await request('/health');
+    const latency = Date.now() - start;
+    if (res && res.status === 'healthy') {
+      return { ok: true, latency, data: res };
+    }
+    return { ok: false, latency, error: 'Unreachable' };
   },
 
   // Dashboard
