@@ -7,7 +7,7 @@ import Modal from '../../components/ui/Modal';
 import ProgressBar from '../../components/ui/ProgressBar';
 import { useScans } from '../../hooks/useScans';
 import { useToast } from '../../components/ui/Toast';
-import { Plus, Play, RefreshCw, Eye, RotateCw, CheckCircle2, AlertTriangle, Layers } from 'lucide-react';
+import { Plus, Play, RefreshCw, Eye, RotateCw, CheckCircle2, AlertTriangle, Layers, FolderGit2, FileArchive, Upload } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
 export default function ScansPage() {
@@ -20,6 +20,9 @@ export default function ScansPage() {
   const [scanName, setScanName] = useState('');
   const [scanTarget, setScanTarget] = useState('github.com/enterprise/checkout-service');
   const [scanType, setScanType] = useState('Source Repository AST');
+  const [targetKind, setTargetKind] = useState('git');
+  const [customRepoUrl, setCustomRepoUrl] = useState('https://github.com/Zeromatrix-159328/ECDAT');
+  const [zipName, setZipName] = useState('');
   const [progress, setProgress] = useState(0);
   const [createdScanId, setCreatedScanId] = useState(null);
 
@@ -29,6 +32,7 @@ export default function ScansPage() {
   const handleStartScanWizard = () => {
     setStep(1);
     setScanName('');
+    setTargetKind('git');
     setProgress(0);
     setModalOpen(true);
   };
