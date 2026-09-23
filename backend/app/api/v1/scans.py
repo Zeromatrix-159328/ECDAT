@@ -329,3 +329,33 @@ def analyze_container_image(payload: Dict[str, Any]):
         "findingsCount": len(findings),
         "findings": findings
     }
+
+@router.post("/repo-branches")
+def get_repo_branches(payload: Dict[str, Any]):
+    repo_url = payload.get("repoUrl", "")
+    if not repo_url:
+        return {"repo": "", "count": 2, "branches": ["main", "gh-pages"]}
+        
+    import urllib.request
+    import json
+    
+    clean = repo_url.replace(".git", "").rstrip("/")
+    if "github.com" in clean:
+        parts = clean.split("github.com/")[-1].split("/")
+        if len(parts) >= 2:
+            owner, repo = parts[0], parts[1]
+            try:
+                req = urllib.request.Request(
+                    f"https://api.github.com/repos/{owner}/{repo}/branches?per_page=100",
+                    headers={"User-Agent": "ECDAT-Scanner", "Accept": "application/vnd.github.v3+json"}
+                )
+                with urllib.request.urlopen(req, timeout=5) as resp:
+                    data = json.loads(resp.read().decode())
+                    if isinstance(data, list):
+                        branches = [b.get("name") for b in data if isinstance(b, dict) and b.get("name")]
+                        if branches:
+                            return {"repo": f"{owner}/{repo}", "count": len(branches), "branches": branches}
+            except Exception:
+                pass
+                
+    return {"repo": repo_url, "count": 2, "branches": ["main", "gh-pages"]}

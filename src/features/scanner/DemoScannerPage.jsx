@@ -1,17 +1,17 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import PageHeader from '../../components/layout/PageHeader';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
 import { scanText } from '../../lib/scanner/scanText';
-import { scanZipArchive, scanGitRepository } from '../../lib/scanner/archiveScanner';
+import { scanZipArchive, scanGitRepository, fetchRepoBranches } from '../../lib/scanner/archiveScanner';
 import { scanLibraryManifest, KNOWN_CRYPTO_LIBRARIES } from '../../lib/scanner/libraryScanner';
 import { scanBinaryFile, getSampleBinaryFindings } from '../../lib/scanner/binaryScanner';
 import { scanDockerfile, scanContainerImageRef, SAMPLE_CONTAINER_PROFILES } from '../../lib/scanner/containerScanner';
 import { useCryptoAssets } from '../../hooks/useCryptoAssets';
 import { useToast } from '../../components/ui/Toast';
 import { 
-  Play, Sparkles, Copy, Trash2, Upload, Plus, CheckCircle2, 
+  Play, Sparkles, RefreshCw, Loader2, Copy, Trash2, Upload, Plus, CheckCircle2, 
   ArrowRight, GitBranch, FileArchive, Code2, FolderGit2, FileText, 
   Layers, Search, AlertTriangle, ShieldCheck, CheckCheck,
   Library, Binary, Container
@@ -91,6 +91,39 @@ export default function DemoScannerPage() {
   const [code, setCode] = useState(SAMPLES.go_rsa);
   const [repoUrl, setRepoUrl] = useState('https://github.com/Zeromatrix-159328/ECDAT');
   const [branch, setBranch] = useState('main');
+  const [branchesList, setBranchesList] = useState(['main', 'gh-pages']);
+  const [isLoadingBranches, setIsLoadingBranches] = useState(false);
+  const [isCustomBranch, setIsCustomBranch] = useState(false);
+
+  const handleFetchBranches = async (url) => {
+    const targetUrl = (url || repoUrl).trim();
+    if (!targetUrl) return;
+    setIsLoadingBranches(true);
+    try {
+      const branches = await fetchRepoBranches(targetUrl);
+      if (branches && branches.length > 0) {
+        setBranchesList(branches);
+        if (!branches.includes(branch)) {
+          if (branches.includes('main')) setBranch('main');
+          else if (branches.includes('master')) setBranch('master');
+          else setBranch(branches[0]);
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to load branches:', err);
+    } finally {
+      setIsLoadingBranches(false);
+    }
+  };
+
+  useEffect(() => {
+    if (sourceSubMode === 'git' && repoUrl.trim()) {
+      const timer = setTimeout(() => {
+        handleFetchBranches(repoUrl);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [repoUrl, sourceSubMode]);
   const [zipFileName, setZipFileName] = useState('');
   const [zipStats, setZipStats] = useState(null);
 
@@ -520,19 +553,101 @@ export default function DemoScannerPage() {
                     </div>
                   </div>
 
-                  <div>
-                    <label style={{ fontSize: '12px', fontWeight: 600, color: '#334155', display: 'block', marginBottom: '6px' }}>
-                      Branch / Tag
-                    </label>
+                  <div style={{ minWidth: '220px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                      <label style={{ fontSize: '12px', fontWeight: 600, color: '#334155' }}>
+                        Branch / Tag
+                      </label>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        {isLoadingBranches ? (
+                          <span style={{ fontSize: '11px', color: '#0284c7', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                            <Loader2 size={11} className="animate-spin" /> Fetching...
+                          </span>
+                        ) : (
+                          <span style={{ fontSize: '11px', color: '#16a34a', fontWeight: 600 }}>
+                            {branchesList.length} {branchesList.length === 1 ? 'branch' : 'branches'}
+                          </span>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleFetchBranches(repoUrl)}
+                          title="Refresh branches list"
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0', color: '#64748b', display: 'flex' }}
+                        >
+                          <RefreshCw size={11} />
+                        </button>
+                      </div>
+                    </div>
+
                     <div style={{ position: 'relative' }}>
-                      <input
-                        type="text"
-                        value={branch}
-                        onChange={(e) => setBranch(e.target.value)}
-                        placeholder="main"
-                        style={{ width: '100%', padding: '9px 12px 9px 32px', fontSize: '13px', borderRadius: '6px', border: '1px solid #cbd5e1', boxSizing: 'border-box' }}
-                      />
-                      <GitBranch size={16} color="#64748b" style={{ position: 'absolute', left: '10px', top: '10px' }} />
+                      {!isCustomBranch ? (
+                        <select
+                          value={branch}
+                          onChange={(e) => {
+                            if (e.target.value === '__custom__') {
+                              setIsCustomBranch(true);
+                              setBranch('');
+                            } else {
+                              setBranch(e.target.value);
+                            }
+                          }}
+                          style={{
+                            width: '100%',
+                            padding: '9px 12px 9px 32px',
+                            fontSize: '13px',
+                            borderRadius: '6px',
+                            border: '1px solid #cbd5e1',
+                            boxSizing: 'border-box',
+                            background: '#ffffff',
+                            color: '#0f172a',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {branchesList.map((b) => (
+                            <option key={b} value={b}>
+                              {b} {b === 'main' || b === 'master' ? '(default)' : ''}
+                            </option>
+                          ))}
+                          <option value="__custom__">+ Enter custom branch...</option>
+                        </select>
+                      ) : (
+                        <div style={{ display: 'flex', gap: '6px' }}>
+                          <input
+                            type="text"
+                            value={branch}
+                            onChange={(e) => setBranch(e.target.value)}
+                            placeholder="e.g. feature/pqc"
+                            autoFocus
+                            style={{
+                              width: '100%',
+                              padding: '9px 12px 9px 32px',
+                              fontSize: '13px',
+                              borderRadius: '6px',
+                              border: '1px solid #0284c7',
+                              boxSizing: 'border-box'
+                            }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsCustomBranch(false);
+                              if (!branch) setBranch(branchesList[0] || 'main');
+                            }}
+                            style={{
+                              fontSize: '11px',
+                              padding: '0 8px',
+                              background: '#f1f5f9',
+                              border: '1px solid #cbd5e1',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              whiteSpace: 'nowrap'
+                            }}
+                          >
+                            List
+                          </button>
+                        </div>
+                      )}
+                      <GitBranch size={16} color="#64748b" style={{ position: 'absolute', left: '10px', top: '10px', pointerEvents: 'none' }} />
                     </div>
                   </div>
 
@@ -543,13 +658,13 @@ export default function DemoScannerPage() {
 
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
                   <span style={{ fontSize: '12px', color: '#64748b' }}>Quick Presets:</span>
-                  <button type="button" onClick={() => setRepoUrl('https://github.com/Zeromatrix-159328/ECDAT')} style={{ fontSize: '11px', padding: '4px 8px', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#f8fafc', cursor: 'pointer' }}>
+                  <button type="button" onClick={() => { setRepoUrl('https://github.com/Zeromatrix-159328/ECDAT'); handleFetchBranches('https://github.com/Zeromatrix-159328/ECDAT'); }} style={{ fontSize: '11px', padding: '4px 8px', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#f8fafc', cursor: 'pointer' }}>
                     Zeromatrix-159328/ECDAT
                   </button>
-                  <button type="button" onClick={() => setRepoUrl('https://github.com/open-quantum-safe/liboqs')} style={{ fontSize: '11px', padding: '4px 8px', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#f8fafc', cursor: 'pointer' }}>
+                  <button type="button" onClick={() => { setRepoUrl('https://github.com/open-quantum-safe/liboqs'); handleFetchBranches('https://github.com/open-quantum-safe/liboqs'); }} style={{ fontSize: '11px', padding: '4px 8px', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#f8fafc', cursor: 'pointer' }}>
                     open-quantum-safe/liboqs
                   </button>
-                  <button type="button" onClick={() => setRepoUrl('https://github.com/openssl/openssl')} style={{ fontSize: '11px', padding: '4px 8px', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#f8fafc', cursor: 'pointer' }}>
+                  <button type="button" onClick={() => { setRepoUrl('https://github.com/openssl/openssl'); handleFetchBranches('https://github.com/openssl/openssl'); }} style={{ fontSize: '11px', padding: '4px 8px', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#f8fafc', cursor: 'pointer' }}>
                     openssl/openssl
                   </button>
                 </div>

@@ -199,3 +199,26 @@ export async function scanGitRepository(repoUrl, branch = 'main', onProgress) {
     };
   }
 }
+
+export async function fetchRepoBranches(repoUrl) {
+  if (!repoUrl || typeof repoUrl !== 'string') return ['main', 'master'];
+  const parsed = parseGitUrl(repoUrl);
+  if (!parsed) {
+    return ['main', 'master', 'dev', 'staging', 'release'];
+  }
+  const { owner, repo } = parsed;
+  try {
+    const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/branches?per_page=100`, {
+      headers: { Accept: 'application/vnd.github.v3+json' }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        return data.map(b => b.name);
+      }
+    }
+  } catch (err) {
+    console.warn('[Branch Fetcher] Error fetching branches:', err);
+  }
+  return ['main', 'master', 'dev'];
+}
