@@ -89,7 +89,7 @@ export default function DemoScannerPage() {
   const [sourceSubMode, setSourceSubMode] = useState('git');
 
   const [code, setCode] = useState(SAMPLES.go_rsa);
-  const [repoUrl, setRepoUrl] = useState('https://github.com/Zeromatrix-159328/ECDAT');
+  const [repoUrl, setRepoUrl] = useState('https://github.com/open-quantum-safe/liboqs');
   const [branch, setBranch] = useState('main');
   const [branchesList, setBranchesList] = useState(['main', 'gh-pages']);
   const [isLoadingBranches, setIsLoadingBranches] = useState(false);
@@ -546,7 +546,7 @@ export default function DemoScannerPage() {
                         type="text"
                         value={repoUrl}
                         onChange={(e) => setRepoUrl(e.target.value)}
-                        placeholder="https://github.com/Zeromatrix-159328/ECDAT"
+                        placeholder="https://github.com/owner/repository"
                         style={{ width: '100%', padding: '9px 12px 9px 36px', fontSize: '13px', borderRadius: '6px', border: '1px solid #cbd5e1', boxSizing: 'border-box' }}
                       />
                       <FolderGit2 size={16} color="#64748b" style={{ position: 'absolute', left: '10px', top: '10px' }} />
@@ -658,14 +658,14 @@ export default function DemoScannerPage() {
 
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
                   <span style={{ fontSize: '12px', color: '#64748b' }}>Quick Presets:</span>
-                  <button type="button" onClick={() => { setRepoUrl('https://github.com/Zeromatrix-159328/ECDAT'); handleFetchBranches('https://github.com/Zeromatrix-159328/ECDAT'); }} style={{ fontSize: '11px', padding: '4px 8px', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#f8fafc', cursor: 'pointer' }}>
-                    Zeromatrix-159328/ECDAT
-                  </button>
                   <button type="button" onClick={() => { setRepoUrl('https://github.com/open-quantum-safe/liboqs'); handleFetchBranches('https://github.com/open-quantum-safe/liboqs'); }} style={{ fontSize: '11px', padding: '4px 8px', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#f8fafc', cursor: 'pointer' }}>
-                    open-quantum-safe/liboqs
+                    open-quantum-safe/liboqs (PQC C/C++)
                   </button>
                   <button type="button" onClick={() => { setRepoUrl('https://github.com/openssl/openssl'); handleFetchBranches('https://github.com/openssl/openssl'); }} style={{ fontSize: '11px', padding: '4px 8px', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#f8fafc', cursor: 'pointer' }}>
-                    openssl/openssl
+                    openssl/openssl (TLS/Crypto)
+                  </button>
+                  <button type="button" onClick={() => { setRepoUrl('https://github.com/golang/crypto'); handleFetchBranches('https://github.com/golang/crypto'); }} style={{ fontSize: '11px', padding: '4px 8px', borderRadius: '4px', border: '1px solid #cbd5e1', background: '#f8fafc', cursor: 'pointer' }}>
+                    golang/crypto (Go Cryptography)
                   </button>
                 </div>
               </div>

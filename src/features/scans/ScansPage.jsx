@@ -21,7 +21,7 @@ export default function ScansPage() {
   const [scanTarget, setScanTarget] = useState('github.com/enterprise/checkout-service');
   const [scanType, setScanType] = useState('Source Repository AST');
   const [targetKind, setTargetKind] = useState('git');
-  const [customRepoUrl, setCustomRepoUrl] = useState('https://github.com/Zeromatrix-159328/ECDAT');
+  const [customRepoUrl, setCustomRepoUrl] = useState('https://github.com/open-quantum-safe/liboqs');
   const [zipName, setZipName] = useState('');
   const [progress, setProgress] = useState(0);
   const [createdScanId, setCreatedScanId] = useState(null);
