@@ -3,6 +3,7 @@ import PageHeader from '../../components/layout/PageHeader';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
+import { Slider } from '@/components/ui/slider';
 import { calculateMosca } from '../../lib/mosca/calculateMosca';
 import { mockMoscaAssessments } from '../../mock/mosca-assessments';
 import { storage } from '../../lib/storage';
@@ -112,53 +113,50 @@ export default function MoscaPage() {
         <Card title="Theorem Parameter Controls" subtitle="Adjust assumptions to simulate quantum runway">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', padding: '8px 0' }}>
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                 <span style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>
                   Data Shelf Life (X): <strong>{shelfLifeX} Years</strong>
                 </span>
                 <span style={{ fontSize: '12px', color: '#64748b' }}>Time data must remain confidential</span>
               </div>
-              <input
-                type="range"
-                min="1"
-                max="25"
-                value={shelfLifeX}
-                onChange={(e) => setShelfLifeX(Number(e.target.value))}
-                style={{ width: '100%', accentColor: '#1e40af' }}
+              <Slider
+                value={[shelfLifeX]}
+                onValueChange={(val) => setShelfLifeX(val[0])}
+                min={1}
+                max={25}
+                step={1}
               />
             </div>
 
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                 <span style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>
                   Migration Time (Y): <strong>{migrationTimeY} Years</strong>
                 </span>
                 <span style={{ fontSize: '12px', color: '#64748b' }}>Time required to deploy PQC</span>
               </div>
-              <input
-                type="range"
-                min="1"
-                max="10"
-                value={migrationTimeY}
-                onChange={(e) => setMigrationTimeY(Number(e.target.value))}
-                style={{ width: '100%', accentColor: '#1e40af' }}
+              <Slider
+                value={[migrationTimeY]}
+                onValueChange={(val) => setMigrationTimeY(val[0])}
+                min={1}
+                max={10}
+                step={1}
               />
             </div>
 
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                 <span style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>
                   Threat Horizon (Z): <strong>{threatHorizonZ} Years</strong>
                 </span>
                 <span style={{ fontSize: '12px', color: '#64748b' }}>Estimated time until CRQC</span>
               </div>
-              <input
-                type="range"
-                min="3"
-                max="20"
-                value={threatHorizonZ}
-                onChange={(e) => setThreatHorizonZ(Number(e.target.value))}
-                style={{ width: '100%', accentColor: '#1e40af' }}
+              <Slider
+                value={[threatHorizonZ]}
+                onValueChange={(val) => setThreatHorizonZ(val[0])}
+                min={3}
+                max={20}
+                step={1}
               />
             </div>
           </div>
