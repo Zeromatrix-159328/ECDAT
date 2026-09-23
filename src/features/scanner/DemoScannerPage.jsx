@@ -3,6 +3,7 @@ import PageHeader from '../../components/layout/PageHeader';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue, SelectSeparator } from '@/components/ui/select';
 import { scanText } from '../../lib/scanner/scanText';
 import { scanZipArchive, scanGitRepository, fetchRepoBranches } from '../../lib/scanner/archiveScanner';
 import { scanLibraryManifest, KNOWN_CRYPTO_LIBRARIES } from '../../lib/scanner/libraryScanner';
@@ -581,35 +582,33 @@ export default function DemoScannerPage() {
 
                     <div style={{ position: 'relative' }}>
                       {!isCustomBranch ? (
-                        <select
+                        <Select
                           value={branch}
-                          onChange={(e) => {
-                            if (e.target.value === '__custom__') {
+                          onValueChange={(val) => {
+                            if (val === '__custom__') {
                               setIsCustomBranch(true);
                               setBranch('');
                             } else {
-                              setBranch(e.target.value);
+                              setBranch(val);
                             }
                           }}
-                          style={{
-                            width: '100%',
-                            padding: '9px 12px 9px 32px',
-                            fontSize: '13px',
-                            borderRadius: '6px',
-                            border: '1px solid #cbd5e1',
-                            boxSizing: 'border-box',
-                            background: '#ffffff',
-                            color: '#0f172a',
-                            cursor: 'pointer'
-                          }}
                         >
-                          {branchesList.map((b) => (
-                            <option key={b} value={b}>
-                              {b} {b === 'main' || b === 'master' ? '(default)' : ''}
-                            </option>
-                          ))}
-                          <option value="__custom__">+ Enter custom branch...</option>
-                        </select>
+                          <SelectTrigger style={{ width: '100%', paddingLeft: '32px' }}>
+                            <SelectValue placeholder="Select branch" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              <SelectLabel>Branches ({branchesList.length})</SelectLabel>
+                              {branchesList.map((b) => (
+                                <SelectItem key={b} value={b}>
+                                  {b} {b === 'main' || b === 'master' ? '(default)' : ''}
+                                </SelectItem>
+                              ))}
+                              <SelectSeparator />
+                              <SelectItem value="__custom__">+ Enter custom branch...</SelectItem>
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
                       ) : (
                         <div style={{ display: 'flex', gap: '6px' }}>
                           <input

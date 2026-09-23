@@ -5,6 +5,7 @@ import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
 import KPICard from '../../components/ui/KPICard';
 import SearchInput from '../../components/ui/SearchInput';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AssetDetailDrawer from '../inventory/AssetDetailDrawer';
 import { useRecommendations } from '../../hooks/useRecommendations';
 import { useMigrationPlans } from '../../hooks/useMigrationPlans';

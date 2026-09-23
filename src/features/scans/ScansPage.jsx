@@ -3,6 +3,7 @@ import PageHeader from '../../components/layout/PageHeader';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Modal from '../../components/ui/Modal';
 import ProgressBar from '../../components/ui/ProgressBar';
 import { useScans } from '../../hooks/useScans';
@@ -251,31 +252,39 @@ export default function ScansPage() {
               <label style={{ fontSize: '12px', fontWeight: 600, color: '#334155', display: 'block', marginBottom: '4px' }}>
                 Scan Target
               </label>
-              <select
-                value={scanTarget}
-                onChange={(e) => setScanTarget(e.target.value)}
-                style={{ width: '100%', padding: '8px 10px', fontSize: '13px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-              >
-                <option value="github.com/enterprise/checkout-service">github.com/enterprise/checkout-service (Go)</option>
-                <option value="github.com/enterprise/identity-provider">github.com/enterprise/identity-provider (Python/OAuth)</option>
-                <option value="github.com/enterprise/settlement-engine">github.com/enterprise/settlement-engine (Java Ledger)</option>
-                <option value="registry.corp.internal/ingress/envoy-edge:v1.28">Container Registry: Envoy Edge Ingress</option>
-              </select>
+              <Select value={scanTarget} onValueChange={setScanTarget}>
+                <SelectTrigger style={{ width: '100%' }}>
+                  <SelectValue placeholder="Select Scan Target" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Scan Targets</SelectLabel>
+                    <SelectItem value="github.com/enterprise/checkout-service">github.com/enterprise/checkout-service (Go)</SelectItem>
+                    <SelectItem value="github.com/enterprise/identity-provider">github.com/enterprise/identity-provider (Python/OAuth)</SelectItem>
+                    <SelectItem value="github.com/enterprise/settlement-engine">github.com/enterprise/settlement-engine (Java Ledger)</SelectItem>
+                    <SelectItem value="registry.corp.internal/ingress/envoy-edge:v1.28">Container Registry: Envoy Edge Ingress</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
               <label style={{ fontSize: '12px', fontWeight: 600, color: '#334155', display: 'block', marginBottom: '4px' }}>
                 Inspection Strategy
               </label>
-              <select
-                value={scanType}
-                onChange={(e) => setScanType(e.target.value)}
-                style={{ width: '100%', padding: '8px 10px', fontSize: '13px', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-              >
-                <option value="Source Repository AST">Source Repository AST (Go, Python, Java, JS)</option>
-                <option value="Container Binary Inspection">Container Binary & Dynamic Link Inspection</option>
-                <option value="Network Endpoint Scan">Network TLS & mTLS Cipher Suite Probe</option>
-              </select>
+              <Select value={scanType} onValueChange={setScanType}>
+                <SelectTrigger style={{ width: '100%' }}>
+                  <SelectValue placeholder="Select Inspection Strategy" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Strategy</SelectLabel>
+                    <SelectItem value="Source Repository AST">Source Repository AST (Go, Python, Java, JS)</SelectItem>
+                    <SelectItem value="Container Binary Inspection">Container Binary & Dynamic Link Inspection</SelectItem>
+                    <SelectItem value="Network Endpoint Scan">Network TLS & mTLS Cipher Suite Probe</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         )}
