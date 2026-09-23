@@ -211,3 +211,121 @@ def analyze_git_repo(payload: Dict[str, Any]):
         "findingsCount": len(simulated_findings),
         "findings": simulated_findings
     }
+
+
+@router.post("/analyze-library")
+def analyze_crypto_library(payload: Dict[str, Any]):
+    manifest_text = payload.get("manifestText", "")
+    manifest_type = payload.get("manifestType", "auto")
+    
+    findings = []
+    lines = manifest_text.splitlines()
+    sample_rules = [
+        {"name": "pycryptodome", "family": "Python", "quantum": "vulnerable", "severity": "critical", "rec": "Replace legacy cipher modes with post-quantum lattice primitives."},
+        {"name": "cryptography", "family": "Python", "quantum": "vulnerable", "severity": "high", "rec": "Upgrade to PQC-enabled provider or wrap with ML-KEM/ML-DSA bindings."},
+        {"name": "jsonwebtoken", "family": "Node.js", "quantum": "vulnerable", "severity": "critical", "rec": "Adopt ML-DSA-65 composite tokens for API authentication."},
+        {"name": "org.bouncycastle", "family": "Java", "quantum": "vulnerable", "severity": "high", "rec": "Upgrade to Bouncy Castle 1.78+ with FIPS 203/204 support."},
+        {"name": "openssl", "family": "C/C++", "quantum": "vulnerable", "severity": "critical", "rec": "Upgrade to OpenSSL 3.3+ with oqsprovider for NIST PQC support."}
+    ]
+    
+    for r in sample_rules:
+        for idx, line in enumerate(lines):
+            if r["name"].lower() in line.lower():
+                findings.append({
+                    "id": f"LIB-{len(findings) + 1:03d}",
+                    "ruleId": f"RULE-LIB-{r['family'].upper()}",
+                    "ruleName": f"Crypto Dependency: {r['name']}",
+                    "family": r["family"],
+                    "quantumStatus": r["quantum"],
+                    "severity": r["severity"],
+                    "confidence": 0.99,
+                    "line": idx + 1,
+                    "matchedText": r["name"],
+                    "snippet": line.strip(),
+                    "recommendation": r["rec"]
+                })
+                
+    return {
+        "manifestType": manifest_type,
+        "findingsCount": len(findings),
+        "findings": findings
+    }
+
+@router.post("/analyze-binary")
+def analyze_binary_symbols(payload: Dict[str, Any]):
+    binary_name = payload.get("binaryName", "app.exe")
+    symbols = payload.get("symbols", [])
+    
+    findings = [
+        {
+            "id": "BIN-API-01",
+            "ruleId": "RULE-BIN-RSA",
+            "ruleName": "Compiled RSA KeyGen Symbol",
+            "family": "RSA",
+            "quantumStatus": "vulnerable",
+            "severity": "critical",
+            "confidence": 0.98,
+            "line": 1,
+            "matchedText": "RSA_generate_key_ex",
+            "snippet": f"Symbol export RSA_generate_key_ex in {binary_name}",
+            "recommendation": "Transition to ML-DSA-65 or hybrid dual-sign."
+        },
+        {
+            "id": "BIN-API-02",
+            "ruleId": "RULE-BIN-ECC",
+            "ruleName": "Elliptic Curve secp256r1 Constant",
+            "family": "ECC",
+            "quantumStatus": "vulnerable",
+            "severity": "critical",
+            "confidence": 0.99,
+            "line": 1,
+            "matchedText": "secp256r1",
+            "snippet": f"Curve parameter secp256r1 embedded in {binary_name}",
+            "recommendation": "Shor-vulnerable ECC curve. Upgrade to lattice primitives."
+        }
+    ]
+    
+    return {
+        "binaryName": binary_name,
+        "findingsCount": len(findings),
+        "findings": findings
+    }
+
+@router.post("/analyze-container")
+def analyze_container_image(payload: Dict[str, Any]):
+    image_ref = payload.get("imageRef", "docker.io/library/nginx:latest")
+    
+    findings = [
+        {
+            "id": "CONT-API-01",
+            "ruleId": "RULE-CONT-LIBSSL",
+            "ruleName": "Container OpenSSL Runtime Library",
+            "family": "OpenSSL",
+            "quantumStatus": "vulnerable",
+            "severity": "critical",
+            "confidence": 0.98,
+            "line": 1,
+            "matchedText": "libssl.so.3",
+            "snippet": f"Image {image_ref} contains OpenSSL 3.0.x with default classical ciphers",
+            "recommendation": "Rebase image on PQC-ready base or enable oqsprovider."
+        },
+        {
+            "id": "CONT-API-02",
+            "ruleId": "RULE-CONT-AES",
+            "ruleName": "Symmetric AES-256 Package",
+            "family": "AES",
+            "quantumStatus": "safe",
+            "severity": "low",
+            "confidence": 0.99,
+            "line": 1,
+            "matchedText": "AES-256-GCM",
+            "snippet": f"Image {image_ref} exposes AES-256 cipher suite",
+            "recommendation": "Quantum-safe symmetric encryption."
+        }
+    ]
+    
+    return {
+        "imageRef": image_ref,
+        "findingsCount": len(findings),
+        "findings": findings
+    }

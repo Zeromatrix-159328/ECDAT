@@ -7,7 +7,7 @@ import Modal from '../../components/ui/Modal';
 import ProgressBar from '../../components/ui/ProgressBar';
 import { useScans } from '../../hooks/useScans';
 import { useToast } from '../../components/ui/Toast';
-import { Plus, Play, RefreshCw, Eye, RotateCw, CheckCircle2, AlertTriangle, Layers, FolderGit2, FileArchive, Upload } from 'lucide-react';
+import { Plus, Play, RefreshCw, Eye, RotateCw, CheckCircle2, AlertTriangle, Layers, FolderGit2, FileArchive, Upload, Library, Binary, Container } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
 export default function ScansPage() {
